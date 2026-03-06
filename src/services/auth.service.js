@@ -1,7 +1,9 @@
+import { NODE_ENV } from "@/constants/global.const";
 import { signToken } from "@/lib/jwt";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User.model";
 import { cookies } from "next/headers";
+
 export async function signupUser({ name, email, password }) {
   await connectDB();
 
@@ -15,20 +17,29 @@ export async function signupUser({ name, email, password }) {
   const user = await User.create({ name, email, password, userName });
 
   const token = signToken({
-    id: user._id,
+    id: user._id.toString(),
     userName: user.userName,
   });
 
   const cookieStore = await cookies();
   cookieStore.set("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: NODE_ENV === "production",
+    sameSite: "lax",
     path: "/",
+    maxAge: 60 * 60 * 24 * 7,
   });
 
-  return { data: user };
+  return {
+    data: {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      userName: user.userName,
+    },
+  };
 }
+
 export async function loginUser({ email, password }) {
   await connectDB();
 
@@ -39,7 +50,7 @@ export async function loginUser({ email, password }) {
   if (!isMatch) throw new Error("INVALID_CREDENTIALS");
 
   const token = signToken({
-    id: user._id,
+    id: user._id.toString(),
     userName: user.userName,
   });
 
@@ -47,9 +58,17 @@ export async function loginUser({ email, password }) {
   cookieStore.set("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/",
+    maxAge: 60 * 60 * 24 * 7,
   });
 
-  return { data: user };
+  return {
+    data: {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      userName: user.userName,
+    },
+  };
 }

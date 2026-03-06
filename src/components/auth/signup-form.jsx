@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signupSchema } from "@/validations/auth.schema";
 import { postData } from "@/helper/helper";
 import { useRouter } from "next/navigation";
+import { SIGN_UP_API } from "@/constants/global.const";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ export default function SignupForm() {
         setServerError(res.error || "something went wrong");
         return;
       }
-      if (res?.userName) setSuccessMessage(res?.message);
+      if (res?.success) setSuccessMessage(res?.message);
       setFormData({
         name: "",
         email: "",

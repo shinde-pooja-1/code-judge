@@ -3,6 +3,8 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { signupUser } from "@/services/auth.service";
 import { signupSchema } from "@/validations/auth.schema";
+import { NODE_ENV } from "@/constants/global.const";
+import { signToken } from "@/lib/jwt";
 
 // POST /api/auth/signup
 export async function POST(request) {
@@ -31,15 +33,15 @@ export async function POST(request) {
       );
     }
 
-    const user = resp.data;
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
-        message: "Account created successfully",
-        userName: user.userName,
+        success: true,
+        message: "Signup successful",
       },
       { status: 201 },
     );
+
+    return response;
   } catch (error) {
     console.error("[POST /api/auth/signup]", error);
 
