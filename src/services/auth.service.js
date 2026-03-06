@@ -1,46 +1,55 @@
-/**
- * auth.service.js
- *
- * Contains all business logic related to authentication.
- * Route handlers should call these functions — never put DB/JWT logic in routes.
- */
-
-import connectDB from "@/lib/mongodb"
-import { signToken } from "@/lib/jwt"
-import User from "@/models/User.model"
-
-// ---------------------------------------------------------------------------
-// Sign up a new user
-// ---------------------------------------------------------------------------
+import { signToken } from "@/lib/jwt";
+import connectDB from "@/lib/mongodb";
+import User from "@/models/User.model";
+import { cookies } from "next/headers";
 export async function signupUser({ name, email, password }) {
-    await connectDB()
+  await connectDB();
 
-    const existing = await User.findOne({ email })
-    if (existing) {
-        throw new Error("EMAIL_ALREADY_IN_USE")
-    }
+  const existing = await User.findOne({ email });
+  if (existing) {
+    return { error: "EMAIL_ALREADY_IN_USE" };
+  }
 
-    // Password is hashed automatically by the User model's pre-save hook
-    const user = await User.create({ name, email, password })
-    return user
+  const userName = email;
+
+  const user = await User.create({ name, email, password, userName });
+
+  const token = signToken({
+    id: user._id,
+    userName: user.userName,
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+  });
+
+  return { data: user };
 }
-
-// ---------------------------------------------------------------------------
-// Log in an existing user — returns a JWT token
-// ---------------------------------------------------------------------------
 export async function loginUser({ email, password }) {
-    await connectDB()
+  await connectDB();
 
-    // .select("+password") because password has `select: false` in the schema
-    const user = await User.findOne({ email }).select("+password")
-    if (!user) throw new Error("INVALID_CREDENTIALS")
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) throw new Error("INVALID_CREDENTIALS");
 
-    const isMatch = await user.comparePassword(password)
-    if (!isMatch) throw new Error("INVALID_CREDENTIALS")
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) throw new Error("INVALID_CREDENTIALS");
 
-    const token = signToken({ id: user._id, role: user.role })
+  const token = signToken({
+    id: user._id,
+    userName: user.userName,
+  });
 
-    // Strip the password before returning the user object
-    const safeUser = { _id: user._id, name: user.name, email: user.email, role: user.role }
-    return { token, user: safeUser }
+  const cookieStore = await cookies();
+  cookieStore.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+  });
+
+  return { data: user };
 }
