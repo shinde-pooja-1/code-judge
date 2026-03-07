@@ -1,10 +1,8 @@
 export const dynamic = "force-dynamic";
 
-import { NextResponse } from "next/server";
 import { signupUser } from "@/services/auth.service";
 import { signupSchema } from "@/validations/auth.schema";
-import { NODE_ENV } from "@/constants/global.const";
-import { signToken } from "@/lib/jwt";
+import { NextResponse } from "next/server";
 
 // POST /api/auth/signup
 export async function POST(request) {

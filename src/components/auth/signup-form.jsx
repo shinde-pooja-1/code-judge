@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { signupSchema } from "@/validations/auth.schema";
+import { API_ROUTES } from "@/constants/global.const";
 import { postData } from "@/helper/helper";
+import { signupSchema } from "@/validations/auth.schema";
 import { useRouter } from "next/navigation";
-import { SIGN_UP_API } from "@/constants/global.const";
+import { useState } from "react";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -14,6 +14,7 @@ export default function SignupForm() {
   });
   const router = useRouter();
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -47,23 +48,32 @@ export default function SignupForm() {
     setErrors({});
 
     try {
-      const res = await postData("/api/auth/signup", result?.data);
+      setLoading(true);
+
+      const res = await postData(API_ROUTES.SIGN_UP_API, result?.data);
 
       if (res?.error) {
         setServerError(res.error || "something went wrong");
         return;
       }
-      if (res?.success) setSuccessMessage(res?.message);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
-      router.push("/");
+      if (res?.success) {
+        setSuccessMessage(res?.message || "Signup Successfull");
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+        });
+        router.push("/");
+      }
     } catch (error) {
       setServerError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
+
+  if (loading)
+    return <p className="font-bold text-2xl text-center">loading......</p>;
 
   return (
     <form
