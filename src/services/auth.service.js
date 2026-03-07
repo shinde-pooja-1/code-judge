@@ -5,39 +5,48 @@ import User from "@/models/User.model";
 import { cookies } from "next/headers";
 
 export async function signupUser({ name, email, password }) {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const existing = await User.findOne({ email });
-  if (existing) {
-    return { error: "EMAIL_ALREADY_IN_USE" };
-  }
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      return { error: "EMAIL_ALREADY_IN_USE" };
+    }
 
-  const userName = email;
+    const userName = email.split("@")[0];
 
-  const user = await User.create({ name, email, password, userName });
+    const user = await User.create({
+      name: name,
+      email: email,
+      password,
+      userName,
+    });
 
-  const token = signToken({
-    id: user._id.toString(),
-    userName: user.userName,
-  });
-
-  const cookieStore = await cookies();
-  cookieStore.set("token", token, {
-    httpOnly: true,
-    secure: NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return {
-    data: {
+    const token = signToken({
       id: user._id.toString(),
-      name: user.name,
-      email: user.email,
       userName: user.userName,
-    },
-  };
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return {
+      data: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        userName: user.userName,
+      },
+    };
+  } catch (error) {
+    return { error: error || "FAILED_TO_SIGNUP" };
+  }
 }
 
 export async function loginUser({ email, password }) {
