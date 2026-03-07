@@ -27,11 +27,14 @@ export async function apiRequest(url, options = {}) {
 }
 
 export async function postData(url = null, data = null) {
-  if (data === null || data === undefined) return { error: "invalid data" };
-  if (Array.isArray(data) && data.length === 0)
+  if (
+    data === null ||
+    data === undefined ||
+    (Array.isArray(data) && data.length === 0) ||
+    (typeof data === "object" && Object.keys(data).length === 0)
+  )
     return { error: "invalid data" };
-  if (typeof data === "object" && Object.keys(data).length === 0)
-    return { error: "invalid data" };
+
   if (!url) return { error: "invalid api" };
 
   return apiRequest(url, {
