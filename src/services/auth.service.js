@@ -24,7 +24,7 @@ export async function signupUser({ name, email, password }) {
 
     const token = signToken({
       id: user._id.toString(),
-      userName: user.userName,
+      userName: user.name,
     });
 
     const cookieStore = await cookies();
@@ -50,34 +50,41 @@ export async function signupUser({ name, email, password }) {
 }
 
 export async function loginUser({ email, password }) {
-  await connectDB();
+  try {
+    await connectDB();
+    console.log("Attempting to find user with email:", email);
+    const user = await User.findOne({ email }).select("+password");
+    if (!user){
+      return { error: "INVALID_CREDENTIALS" };
+    } 
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch){
+      return { error: "INCORRECT_PASSWORD" };
+    } 
 
-  const user = await User.findOne({ email }).select("+password");
-  if (!user) throw new Error("INVALID_CREDENTIALS");
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) throw new Error("INVALID_CREDENTIALS");
-
-  const token = signToken({
-    id: user._id.toString(),
-    userName: user.userName,
-  });
-
-  const cookieStore = await cookies();
-  cookieStore.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return {
-    data: {
+    const token = signToken({
       id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      userName: user.userName,
-    },
-  };
+      userName: user.name,
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return {
+      data: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        userName: user.userName,
+      },
+    };
+  } catch (error) {
+    return { error: error || "FAILED_TO_LOGIN" };
+  }
 }
