@@ -10,10 +10,11 @@ export default function LoginForm() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -35,8 +36,8 @@ export default function LoginForm() {
     try {
       const res = await postData(API_ROUTES.LOGIN_API, result?.data);
       if (res?.error) {
-        setServerError(res.error || "something went wrong");
-        console.error("Login error:", res.error);
+        setError(res.error || "something went wrong");
+        // console.error("Login error:", res.error);
         return;
       }
       if (res?.success) {
@@ -56,26 +57,43 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4  bg-white text-black"
+    >
       <input
         name="email"
         type="email"
-        placeholder="Email"
+        placeholder="Enter Email"
         value={form.email}
         onChange={handleChange}
         required
       />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={handleChange}
-        required
-      />
+      <div className="relative">
+        <input
+          name="password"
+          type={showPassword ? "text" : "password"}
+          placeholder="Enter password"
+          value={form.password}
+          onChange={handleChange}
+          required
+        />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2"
+        >
+          {showPassword ? "🙈" : "👁️"}
+        </button>
+      </div>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <button type="submit" disabled={loading}>
-        {loading ? "Signing in…" : "Login"}
+
+      <button
+        type="submit"
+        className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800  transition"
+      >
+        {loading ? "Signing In..." : "Login"}
       </button>
     </form>
   );

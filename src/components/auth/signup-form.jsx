@@ -14,6 +14,8 @@ export default function SignupForm() {
   });
   const router = useRouter();
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -72,13 +74,10 @@ export default function SignupForm() {
     }
   }
 
-  if (loading)
-    return <p className="font-bold text-2xl text-center">loading......</p>;
-
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 max-w-md mx-auto bg-white text-black p-8"
+      className="flex flex-col gap-4  bg-white text-black"
     >
       <div>
         <input
@@ -87,7 +86,8 @@ export default function SignupForm() {
           placeholder="Enter name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className=""
+          required
         />
         {errors.name && (
           <p className="text-red-500 text-sm">{errors.name[0]}</p>
@@ -101,22 +101,30 @@ export default function SignupForm() {
           placeholder="Enter email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          required
         />
         {errors.email && (
           <p className="text-red-500 text-sm">{errors.email[0]}</p>
         )}
       </div>
 
-      <div>
+      <div className="relative">
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           name="password"
           placeholder="Enter password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          required
         />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2"
+        >
+          {showPassword ? "🙈" : "👁️"}
+        </button>
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password[0]}</p>
         )}
@@ -127,8 +135,11 @@ export default function SignupForm() {
         <p className="text-green-600 text-sm">{successMessage}</p>
       )}
 
-      <button type="submit" className="bg-black text-white px-4 py-2 rounded">
-        Sign Up
+      <button
+        type="submit"
+        className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800  transition"
+      >
+        {loading ? "Signing Up..." : "Sign Up"}
       </button>
     </form>
   );
