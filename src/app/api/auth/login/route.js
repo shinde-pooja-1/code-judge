@@ -14,6 +14,7 @@ export async function POST(request) {
             )
         }
         const resp = await loginUser(parsed.data);
+        console.log("login resp", resp);
         if (resp?.error) {
             return NextResponse.json(
                 {
@@ -22,7 +23,7 @@ export async function POST(request) {
                 { status: 409 },
             );
         }
-        return  NextResponse.json(
+        return NextResponse.json(
             {
                 success: true,
                 message: "Login successful",

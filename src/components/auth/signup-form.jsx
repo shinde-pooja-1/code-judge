@@ -63,7 +63,8 @@ export default function SignupForm() {
           email: "",
           password: "",
         });
-        router.push("/");
+        router.push("/dashboard");
+        router.refresh();
       }
     } catch (error) {
       setServerError("Network error. Please try again.");

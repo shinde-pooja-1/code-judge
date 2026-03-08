@@ -52,15 +52,14 @@ export async function signupUser({ name, email, password }) {
 export async function loginUser({ email, password }) {
   try {
     await connectDB();
-    console.log("Attempting to find user with email:", email);
     const user = await User.findOne({ email }).select("+password");
-    if (!user){
+    if (!user) {
       return { error: "INVALID_CREDENTIALS" };
-    } 
+    }
     const isMatch = await user.comparePassword(password);
-    if (!isMatch){
+    if (!isMatch) {
       return { error: "INCORRECT_PASSWORD" };
-    } 
+    }
 
     const token = signToken({
       id: user._id.toString(),
