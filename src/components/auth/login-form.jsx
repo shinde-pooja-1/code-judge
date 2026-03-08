@@ -48,6 +48,7 @@ export default function LoginForm() {
           password: "",
         });
         router.push("/");
+        router.refresh();
       }
     } catch (err) {
       setError(err.message);
@@ -66,6 +67,7 @@ export default function LoginForm() {
         onChange={handleChange}
         required
       />
+      {error?.email && <p style={{ color: "red" }}>{error?.email[0]}</p>}
       <input
         name="password"
         type="password"
@@ -74,7 +76,7 @@ export default function LoginForm() {
         onChange={handleChange}
         required
       />
-      {error && <p style={{ color: "red" }}>{JSON.stringify(error)}</p>}
+      {error?.password && <p style={{ color: "red" }}>{error?.password[0]}</p>}
       {serverError && <p style={{ color: "red" }}>{serverError}</p>}
       <button type="submit" disabled={loading}>
         {loading ? "Signing in…" : "Login"}
