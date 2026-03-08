@@ -48,7 +48,7 @@ export default function LoginForm() {
           email: "",
           password: "",
         });
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {
