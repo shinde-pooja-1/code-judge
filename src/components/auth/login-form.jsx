@@ -30,6 +30,7 @@ export default function LoginForm() {
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
       setError(fieldErrors);
+      setLoading(false);
       return;
     }
 
@@ -37,7 +38,7 @@ export default function LoginForm() {
       const res = await postData(API_ROUTES.LOGIN_API, result?.data);
       if (res?.error) {
         setError(res.error || "something went wrong");
-        // console.error("Login error:", res.error);
+        console.error("Login error:", res.error);
         return;
       }
       if (res?.success) {
@@ -48,6 +49,7 @@ export default function LoginForm() {
           password: "",
         });
         router.push("/");
+        router.refresh();
       }
     } catch (err) {
       setError(err.message);
@@ -69,6 +71,7 @@ export default function LoginForm() {
         onChange={handleChange}
         required
       />
+      {error?.email && <p style={{ color: "red" }}>{error?.email[0]}</p>}
       <div className="relative">
         <input
           name="password"
@@ -86,14 +89,17 @@ export default function LoginForm() {
         >
           {showPassword ? "🙈" : "👁️"}
         </button>
+        {error?.password && (
+          <p style={{ color: "red" }}>{error?.password[0]}</p>
+        )}
       </div>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {serverError && <p style={{ color: "red" }}>{serverError}</p>}
 
       <button
         type="submit"
         className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800  transition"
       >
-        {loading ? "Signing In..." : "Login"}
+        {loading ? "Login..." : "Login"}
       </button>
     </form>
   );

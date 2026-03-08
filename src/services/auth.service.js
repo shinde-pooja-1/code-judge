@@ -52,7 +52,6 @@ export async function signupUser({ name, email, password }) {
 export async function loginUser({ email, password }) {
   try {
     await connectDB();
-    console.log("Attempting to find user with email:", email);
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return { error: "INVALID_CREDENTIALS" };

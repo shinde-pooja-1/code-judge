@@ -7,8 +7,8 @@ export async function apiRequest(url, options = {}) {
         ...(options?.headers || {}),
       },
     });
+    console.log("api res", res);
     res = await res.json();
-
     if (res?.error) {
       return {
         error: res?.error || res?.message || `Request failed with status`,
