@@ -29,13 +29,14 @@ export default function LoginForm() {
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
       setError(fieldErrors);
+      setLoading(false);
       return;
     }
 
     try {
       const res = await postData(API_ROUTES.LOGIN_API, result?.data);
       if (res?.error) {
-        setServerError(res.error || "something went wrong");
+        setError(res.error || "something went wrong");
         console.error("Login error:", res.error);
         return;
       }
@@ -73,7 +74,8 @@ export default function LoginForm() {
         onChange={handleChange}
         required
       />
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{JSON.stringify(error)}</p>}
+      {serverError && <p style={{ color: "red" }}>{serverError}</p>}
       <button type="submit" disabled={loading}>
         {loading ? "Signing in…" : "Login"}
       </button>
