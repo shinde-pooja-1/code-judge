@@ -6,8 +6,6 @@ import { loginSchema } from "@/validations/auth.schema"
 export async function POST(request) {
     try {
         const body = await request.json()
-
-        // 1. Validate incoming data
         const parsed = loginSchema.safeParse(body)
         if (!parsed.success) {
             return NextResponse.json(
@@ -15,14 +13,22 @@ export async function POST(request) {
                 { status: 400 }
             )
         }
-
-        // 2. Delegate to the service layer (returns token + user)
-        const { token, user } = await loginUser(parsed.data)
-
-        return NextResponse.json(
-            { message: "Login successful", token, user },
-            { status: 200 }
-        )
+        const resp = await loginUser(parsed.data);
+        if (resp?.error) {
+            return NextResponse.json(
+                {
+                    error: resp.error,
+                },
+                { status: 409 },
+            );
+        }
+        return  NextResponse.json(
+            {
+                success: true,
+                message: "Login successful",
+            },
+            { status: 200 },
+        );
     } catch (error) {
         console.error("[POST /api/auth/login]", error)
 

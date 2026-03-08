@@ -1,13 +1,19 @@
 "use client";
 
-import { getData, postData } from "@/helper/helper";
+import { API_ROUTES } from "@/constants/global.const";
+import { postData } from "@/helper/helper";
+import { loginSchema } from "@/validations/auth.schema";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-// Client component — handles form state and submission
 export default function LoginForm() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -18,13 +24,30 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
+    const result = loginSchema.safeParse(form);
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setError(fieldErrors);
+      return;
+    }
+
     try {
-      const res = await postData("/api/auth/login");
-
-      if (res?.error) throw new Error(res.error || "Login failed");
-
-      // TODO: store token (e.g. in a cookie via middleware) and redirect
-      console.log("Token:", res);
+      const res = await postData(API_ROUTES.LOGIN_API, result?.data);
+      if (res?.error) {
+        setServerError(res.error || "something went wrong");
+        console.error("Login error:", res.error);
+        return;
+      }
+      if (res?.success) {
+        setSuccessMessage(res?.message || "Login Successfull");
+        setForm({
+          name: "",
+          email: "",
+          password: "",
+        });
+        router.push("/");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
