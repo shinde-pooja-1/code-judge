@@ -37,7 +37,7 @@ export default function LoginForm() {
     try {
       const res = await postData(API_ROUTES.LOGIN_API, result?.data);
       if (res?.error) {
-        setError(res.error || "something went wrong");
+        setServerError(res.error || "something went wrong");
         console.error("Login error:", res.error);
         return;
       }
