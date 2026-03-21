@@ -42,6 +42,7 @@ export async function signupUser({ name, email, password }) {
         name: user.name,
         email: user.email,
         userName: user.userName,
+        role: user.role,
       },
     };
   } catch (error) {
@@ -81,6 +82,7 @@ export async function loginUser({ email, password }) {
         name: user.name,
         email: user.email,
         userName: user.userName,
+        role: user.role,
       },
     };
   } catch (error) {

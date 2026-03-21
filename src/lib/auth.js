@@ -2,6 +2,22 @@ import { cookies } from "next/headers";
 import { verifyToken } from "./jwt";
 import connectDB from "./mongodb";
 import User from "@/models/User.model";
+import { ADMIN_EMAILS } from "@/constants/global.const";
+
+function getAdminEmailSet() {
+  return new Set(
+    ADMIN_EMAILS.split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+export function isAdminUser(user) {
+  if (!user?.email) return false;
+
+  const adminEmails = getAdminEmailSet();
+  return user.role === "admin" || adminEmails.has(user.email.toLowerCase());
+}
 
 export async function getCurrentUser() {
   try {
@@ -22,6 +38,8 @@ export async function getCurrentUser() {
       name: user.name,
       userName: user.userName,
       email: user.email,
+      role: isAdminUser(user) ? "admin" : user.role || "user",
+      isAdmin: isAdminUser(user),
     };
   } catch {
     return null;
